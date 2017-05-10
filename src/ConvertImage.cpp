@@ -2,6 +2,7 @@
 
 
 
+
  * ConvertImage.cpp
  *
  *  Created on: May 8, 2017
@@ -40,6 +41,22 @@ Mat convert2Gray(Mat m)
 	return grayImage;
 }
 
+Mat convert2RGB(Mat img)
+{
+	Mat cimg;
+	if (img.type()==CV_8UC1) {
+	              //input image is grayscale
+	    cvtColor(img, cimg, CV_GRAY2RGB);
+
+	  } else {
+	              //input image is colour
+	    cimg = img;
+	    cvtColor(img, img, CV_RGB2GRAY);
+	  }
+	return cimg;
+
+}
+
 int main( int argc, char** argv )
 {
 	 string imageName="/home/dieuninh/workspace/ConvertImage/images/16.jpg" ;//=new char;//= argv[1];
@@ -53,17 +70,24 @@ int main( int argc, char** argv )
 		return -1;
 	}
 
-	namedWindow( imageName, WINDOW_NORMAL );
-	imshow( imageName, image );
-	Mat i1=convert2binary(image);
-	namedWindow( imageName, WINDOW_NORMAL );
-	imshow( "binary Image",i1 );
+//	namedWindow( imageName, WINDOW_NORMAL );
+//	imshow( imageName, image );
+
+//	Mat i1=convert2binary(image);
+//	namedWindow( imageName, WINDOW_NORMAL );
+//	imshow( "binary Image",i1 );
+
 	Mat i=convert2Gray(image);
 	namedWindow( "gray image", WINDOW_NORMAL );
-	imshow( "i", i );
+	imshow( "igray", i );
+
+	Mat rgbImage=convert2RGB(i);
+	namedWindow( "rgb image", WINDOW_NORMAL );
+	imshow( "rgb image", rgbImage );
 	waitKey(0);
 return 0;
 }
+
 
 
 
