@@ -1,5 +1,7 @@
 /*
 
+
+
  * ConvertImage.cpp
  *
  *  Created on: May 8, 2017
@@ -13,7 +15,7 @@
 #include <time.h>
 using namespace std;
 using namespace cv;
-Xay dung chtr sd opencv de trich chon bk diem anh ma co bit khac 0
+//Xay dung chtr sd opencv de trich chon bk diem anh ma co bit khac 0
 	//cach 1: sd Vec3b : Vec3b vec = image.at<Vec3b>(i, j);
 	//Point2f point = pointsMat.at<Point2f>(i, 0);
 	//Vec3f intensity = img.at<Vec3f>(y, x);
@@ -45,7 +47,7 @@ int main( int argc, char** argv )
 	Mat image;
 	image = imread( imageName, 1 );
 
-	if( /argc != 2 || !image.data )
+	if(!image.data )
 	{
 		printf( " No image data \n " );
 		return -1;
@@ -62,5 +64,7 @@ int main( int argc, char** argv )
 	waitKey(0);
 return 0;
 }
+
+
 
 */
