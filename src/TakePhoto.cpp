@@ -23,10 +23,11 @@ int main(int argc, char **argv) {
 	        return -1;
 		}
 		int time=0;
+		 Mat frame, photo;
 	    while(1)
 	    {
 
-	          Mat frame;
+
 	          cap >> frame;
 	          if( frame.empty()) break; // end of video stream
 	          imshow("Camera :)", frame);
@@ -37,9 +38,13 @@ int main(int argc, char **argv) {
 	        	  {
 	        	  cap.set(CV_CAP_PROP_POS_FRAMES,time);
 	        	  imwrite( filename, frame );
+	        	  photo=frame.clone();
 	        	  break; // stop capturing by pressing ESC
 	        	  }
 	    }
+	    imshow("Anh vua chup",photo);
+	    cap.release();
+	    waitKey(0);
 	    // the camera will be closed automatically upon exit
 
 	    return 0;
