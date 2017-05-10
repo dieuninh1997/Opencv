@@ -8,11 +8,13 @@
 
 #include "opencv2/opencv.hpp"
 #include<iostream>
+#include<cstring>
+#include<stdlib.h>
 using namespace cv;
 using namespace std;
 int main(int argc, char **argv) {
 		VideoCapture cap;
-		string filename="/home/dieuninh/Desktop/photo1.jpg";
+		//string filename="/home/dieuninh/Desktop/photo";
 
 		//	    	 cout<<filename<<endl;
 	    // open the default camera, use something different from 0 otherwise;
@@ -23,7 +25,8 @@ int main(int argc, char **argv) {
 	        return -1;
 		}
 		int time=0;
-		 Mat frame, photo;
+		int id=0;
+		Mat frame, photo;
 	    while(1)
 	    {
 
@@ -33,18 +36,31 @@ int main(int argc, char **argv) {
 	          imshow("Camera :)", frame);
 	          time++;
 
+	          char frame_id[30];
+	          char filename[100];
+	          strcpy(filename, "/home/dieuninh/Desktop/photo_");
 
+	          cap.set(CV_CAP_PROP_POS_FRAMES,time);
 	          if( waitKey(10) == 13 )
 	        	  {
-	        	  cap.set(CV_CAP_PROP_POS_FRAMES,time);
+
+	        	  sprintf(frame_id,"%d",id);
+	        	  strcat(filename,frame_id);
+	        	  strcat(filename,".jpg");
+
+//	        	  strcat(filename, frame_id);
+//	        	  strcat(filename, ".jpg");
 	        	  imwrite( filename, frame );
 	        	  photo=frame.clone();
-	        	  break; // stop capturing by pressing ESC
+	        	  imshow("Anh vua chup",photo);
+	        	  id++;
+	        	  //break; // stop capturing by pressing ESC
 	        	  }
+	          if(waitKey(10)==27)break;
 	    }
-	    imshow("Anh vua chup",photo);
-	    cap.release();
-	    waitKey(0);
+
+//	    cap.release();
+//	    waitKey(0);
 	    // the camera will be closed automatically upon exit
 
 	    return 0;
