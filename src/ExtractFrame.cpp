@@ -1,5 +1,6 @@
 /*
 
+
  * ExtractFrame.cpp
  *
  *  Created on: May 10, 2017
@@ -76,7 +77,7 @@ int main( int argc, char** argv )
 		return -1;
 	}
 	showCamera(cap);
-	extractImageFromVideo(cap);
+	//extractImageFromVideo(cap);
 
 	return 0;
 }

@@ -7,23 +7,41 @@
 
 
 #include "opencv2/opencv.hpp"
+#include<iostream>
 using namespace cv;
+using namespace std;
 int main(int argc, char **argv) {
-	VideoCapture cap;
+		VideoCapture cap;
+		string filename="/home/dieuninh/Desktop/photo1.jpg";
+
+		//	    	 cout<<filename<<endl;
 	    // open the default camera, use something different from 0 otherwise;
 	    // Check VideoCapture documentation.
-	    if(!cap.open(0))
-	        return 0;
-	    for(;;)
+		if(!cap.open(0))  // check if we succeeded
+
+		{	cout << "Cannot open the camera" << endl;
+	        return -1;
+		}
+		int time=0;
+	    while(1)
 	    {
+
 	          Mat frame;
 	          cap >> frame;
-	          if( frame.empty() ) break; // end of video stream
+	          if( frame.empty()) break; // end of video stream
 	          imshow("Camera :)", frame);
-	          if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
+	          time++;
+
+
+	          if( waitKey(10) == 13 )
+	        	  {
+	        	  cap.set(CV_CAP_PROP_POS_FRAMES,time);
+	        	  imwrite( filename, frame );
+	        	  break; // stop capturing by pressing ESC
+	        	  }
 	    }
 	    // the camera will be closed automatically upon exit
-	    // cap.close();
+
 	    return 0;
 }
 
