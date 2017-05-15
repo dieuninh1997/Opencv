@@ -1,133 +1,145 @@
-/*
-#include<opencv2/opencv.hpp>
 #include<iostream>
-#include<string.h>
-using namespace cv;
+#include<dirent.h>
+#include<opencv2/opencv.hpp>
 using namespace std;
-RNG rng(12345);
-bool loadAnh(int so, Mat &image)
-{
-	char filename[100];
-	strcpy(filename, "/home/dieuninh/Desktop/anh/a");
-	char frame_id[30];
-	sprintf(frame_id,"%d",so);
-	strcat(filename, frame_id);
-	strcat(filename, ".jpg");
-	image=imread(filename,1);//load color image bgr
-	if(!image.data)
-	{
-		strcat(filename,": No image data!");
-		cout<<"\n";
-		return false;
-	}
+using namespace cv;
 
-	return true;
+const int MIN_PIXEL_WIDTH = 2;
+const int MIN_PIXEL_HEIGHT = 8;
+const int MIN_PIXEL_AREA = 80;
+
+
+const double MIN_ASPECT_RATIO =1.0;// 0.25;
+const double MAX_ASPECT_RATIO =1.3; //1.0;
+
+bool flag=false;
+int threshold=5;
+int b_size=10;
+int dist_scale=4;
+int area;
+
+bool checkExtension(string path, string ex)
+{
+	string e="";
+	for(int i=path.length()-1; i>=0; i--)
+	{
+		if(path[i]=='.')break;
+		e=path[i]+e;
+	}
+	return ex.compare(e)==0;
+}
+vector<string> getListItem(char *url)
+{
+	vector<string> v;
+	DIR *dir;
+	struct dirent *ent;
+	if((dir=opendir(url))!=NULL)
+	{
+		while((ent=readdir(dir))!=NULL)
+		{
+			if(checkExtension(ent->d_name,"jpg"))
+			{
+				v.push_back(ent->d_name);
+			}
+		}
+		closedir(dir);
+	}else
+	{
+		cout<<"could not open directory"<<endl;
+		perror("");
+	}
+	return v;
+}
+Mat convertBinaryImg(Mat gray)
+{
+	Mat binary;
+	adaptiveThreshold(gray,binary,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,15,7.0);
+	return binary;
 }
 
-void cutAnh(Mat image, int so)
+Mat findPLate(Mat binary)
 {
-	Mat img1=image.clone();
-	Mat img;
-	cvtColor(image, img, COLOR_BGR2GRAY );
-	//blur(img,img,Size(10,10));//loc anh
-	Mat binary_img,morph,morph_inv, b_inv;
+	Mat plate,canny;
+	vector<vector<Point> >contours;
+	vector<Vec4i> hierachy;
 
-	threshold(img,binary_img,120,255,CV_THRESH_BINARY);
-//	adaptiveThreshold(img,binary_img,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,3,1.5);
-	imshow("Binary ",binary_img);
-	threshold(binary_img,b_inv,0,255,CV_THRESH_BINARY_INV);
-	imshow("Binary inv ",b_inv);
-	//ham dinh hinh khoi
-	Mat kernel=getStructuringElement(MORPH_CROSS,Size(5,5),Point(1,1));//mac dinh Point(-1,-1), anh matrix 3x3
-	erode(b_inv,  morph,kernel,Point(1,1),1);//make white smaller
-//	dilate(binary_img,morph_inv,kernel,Point(1,1),1);
-
-//	imshow("Gray Image ",img);
-
-	//ham tim bien dang, tim vien anh
-	vector<vector<Point> > contour;
-	findContours(morph,contour,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLECV_
-	RETR_LIST,CV_CHAIN_APPROX_NONE);
+	Canny(binary,canny,100,100*2,3);
+	findContours(canny,contours,hierachy,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
 
 
-	char saveFilePath[100];
-	strcpy(saveFilePath, "/home/dieuninh/Desktop/save/b");
-	char _id[30];
-	sprintf(_id,"%d",so);
-	strcat(saveFilePath, _id);
-	strcat(saveFilePath, ".jpg");
+	return plate;
+}
 
-	Rect r;
-	Mat anh;
-	  vector<vector<Point> >hull( contour.size() );
+Scalar GetPixel(int x, int y, Mat input)
+{
+	uchar *d1=(uchar *)(input.data);
+	int index=3*x+(input.step*y);
+	int v1=d1[index];
+	int v2=d1[index+1];
+	int v3=d1[index+2];
+	Scalar xx=Scalar(v1,v2,v3,0);
+	return xx;
+}
+//setting the label for pixel at location x,y
+void SetPixel(int x, int y, Mat output, int area)
+{
+	uchar *d1=(uchar *)(output.data);
+	int index=3*x+(output.step*y);
+	d1[index]=0;
+	d1[index+1]=255;
+	d1[index+2]=255;
+	area=area+1;
+}
+/* seed fill recurive function */
+void SeedFill(int x, int y,Mat input)
+{
+	flag=false;
+	area=0;
 
-	for(int i=0;i<contour.size();i++)
-	{
+}
+Mat regionGrowing(Mat a, int x, int y, Scalar color)
+{
+	Mat input,output;
+	flag=false;
+	//setting up input and output matrices
+	a.copyTo(input);
+	a.copyTo(output);
 
-		/// Find the convex hull object for each contour
+	area=0;
+	int nMinY=0;
+	int nMinX=0;
+	int nMaxY=input.rows-1;
+	int nMaxX=input.cols-1;
+	int morph_size=1;
+	Mat element=getStructuringElement(MORPH_RECT,Size(2*morph_size+1, 2*morph_size+1),Point(morph_size,morph_size));
+	output.setTo(Scalar::all(0));
+	//getting seed pixel values
 
-		     convexHull( Mat(contour[i]), hull[i], false );
 
 
-//		 r=boundingRect(contour[i]);
-//		 if(r.height*r.width>0)
-		 {
-			 //if(r.width/(double)r.height>=1.0f && r.width/(double)r.height<1.5f)
-			 {
-//				 rectangle(img1,r,Scalar(0,0,255),1,8,0);//mau do
-//				 drawContours(binary_img,,Scalar(0,0,255));
-//				 anh=img1(r);
-				// imwrite(saveFilePath,anh);
-				 imshow("Cut Image ",img1);
-//				 break;
-			 }else
-			 {
-				 rectangle(img1,r,Scalar(0,0,255),1,8,0);//mau do
-				//				 drawContours(binary_img,,Scalar(0,0,255));
-								 anh=img1(r);
-				//				 imwrite(saveFilePath,anh);
-								 imshow("Cut Image ",anh);
-								 break;
-			 }
-		 }
-	}
 
-	 Mat drawing = Mat::zeros( binary_img.size(), CV_8UC3 );
-	   for( int i = 0; i< contour.size(); i++ )
-	      {
-	        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-	        drawContours( drawing, contour, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-	        drawContours( drawing, hull, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-	      }
-	   imshow( "Hull demo", drawing );
-//	imshow("Color Image ",img1);
 
+	return a;
 }
 
 int main(int argc, char **argv) {
-
-
-	int numberOfImages=17;
-//	while(numberOfImages)
+	/*char *url=("/home/dieuninh/Downloads/Car/");
+	string rs="home/dieuninh/Downloads/Kq/";
+	vector<string> files=getListItem(url);
+	for(int i=0; i<files.size();i++)
 	{
-		cout<<numberOfImages<<endl;
-		Mat i;
-		char filename[100];
-		strcpy(filename, "Anh ");
-		char nameWindow[30];
-		sprintf(nameWindow,"%d",numberOfImages);
-		if(loadAnh(numberOfImages,i))
-		{
-			imshow(nameWindow,i);
-			cutAnh(i,numberOfImages);
+		Mat image=imread(url+files[i],1);
+		Mat gray;
+		cvtColor(image,gray,COLOR_BGR2GRAY );
+		Mat binary=convertBinaryImg(gray);
+		'imshow("Gray",gray);
+		'imshow("Image",image);
+		'imshow("Adaptive Binary",binary);
 
-		}
-//		numberOfImages--;
-
+		Mat plate=findPLate(binary);
+		string name=rs+files[i];
+		imwrite(name,plate);
 	}
-	waitKey(0);
+	waitKey(0)*/;
 	return 0;
 }
-
-
-*/

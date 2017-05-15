@@ -7,7 +7,7 @@
  *      Author: dieuninh
 
 
-
+*/
 
 #include "opencv2/opencv.hpp"
 #include<iostream>
@@ -47,7 +47,7 @@ void extractImageFromVideo(VideoCapture cap)
 	    	Mat image2;
 	    	cap>>image2;
 	    	char filename[100];
-	    	strcpy(filename, "/home/dieuninh/Desktop/video/frame_");
+	    	strcpy(filename, "/home/dieuninh/Desktop/frame/img_");
 
 	    	char frame_id[30];
 	    	sprintf(frame_id,"%d",id);
@@ -59,26 +59,15 @@ void extractImageFromVideo(VideoCapture cap)
 }
 
 
-
-
-int main( int argc, char** argv )
-{
-	VideoCapture cap(0); // open the default camera
-
-	if(!cap.isOpened())  // check if we succeeded
-	{	cout << "Cannot open the camera" << endl;
-        return -1;
-	}
-
-
-	VideoCapture cap("/home/dieuninh/Desktop/video/1.mp4");
-	if( !cap.isOpened()){
-		cout << "Cannot open the video file" << endl;
-		return -1;
-	}
-	showCamera(cap);
-	//extractImageFromVideo(cap);
-
-	return 0;
+int main(int argc, char **argv) {
+	VideoCapture cap("/home/dieuninh/Desktop/1.mp4");
+		if( !cap.isOpened()){
+			cout << "Cannot open the video file" << endl;
+			return -1;
+		}
+	//	showCamera(cap);
+		extractImageFromVideo(cap);
+		waitKey(0);
 }
-*/
+
+
