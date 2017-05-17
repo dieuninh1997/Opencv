@@ -57,57 +57,58 @@ void extractImageFromVideo(VideoCapture cap)
 	    	 imwrite( filename, image2 );
 	    }
 }
-
+vector<Mat> store;
 void extractFromStream(VideoCapture cap)
 {
-	 double count = cap.get(CV_CAP_PROP_FRAME_COUNT); //get the frame count
-//	 double t=cvGetTickCount();
-//	 cout<<"tick count frame in video="<<t;
-	 cout<<"\ncount frame in video="<<count;
-	int i=0;
+//	 double count = cap.get(CV_CAP_PROP_FRAME_COUNT); //get the frame count
+	 int id=0;
 	 while(1)
 	{
 		Mat img;
-		//cap.retrieve(img);
 		bool bSuccess = cap.read(img);
 
+		//int conti=cap.get(CV_CAP_PROP_POS_MSEC);
+		//cout<<"CV_CAP_PROP_POS_MSEC: "<<con
+		//cout<<conti<<endl;
 		if(!bSuccess)
 		{
+			//int conti=cap.get(CV_CAP_PROP_POS_MSEC);
+			//cap.set(CV_CAP_PROP_POS_MSEC, conti); //start the video at 300ms
 			cout<<"No frame\n";
-			double conti=cap.get(CV_CAP_PROP_POS_MSEC);
-			if(conti<count)
-			{
-				cout<<"\nTiep tuc "<<conti<<endl;
-				cap.retrieve(img);
-				goto ninh;
-			}
-			waitKey(0);
+			waitKey();
 
 		}
-		ninh:
-		char filename[100];
-		strcpy(filename, "/home/dieuninh/Desktop/video/img_");
-		i++;
-		char frame_id[30];
-		sprintf(frame_id,"%d",i);
-		strcat(filename, frame_id);
-		strcat(filename, ".jpg");
-		cout<<endl<<filename<<endl;
-		imwrite( filename, img );
-		if(cv::waitKey(1) ==27) break;
+		id++;
+		if(img.data)
+		{
+			char filename[100];
+
+			strcpy(filename, "/home/dieuninh/Desktop/ninh/i_");
+			char frame_id[30];
+			sprintf(frame_id,"%d",id);
+			strcat(filename, frame_id);
+			strcat(filename, ".jpg");
+			cout<<endl<<filename<<endl;
+			imwrite( filename, img );
+			if(cv::waitKey(1) ==27) break;
+		}
 	}
 }
 int main() {
+	string stream="http://4co2.vp9.tv/chn/VTT4/v.m3u8";
 	VideoCapture cap;
-	cap.open("http://4co2.vp9.tv/chn/VTT4/v.m3u8");
+	cap.open(stream);
+
 	if( !cap.isOpened()){
-			cout << "Cannot open the video file" << endl;
-			return -1;
-		}
-	cout<<"OKKKKKKKKKKKK";
-	//	showCamera(cap);
+		cout << "Cannot open the video file" << endl;
+		return -1;
+	}
+	while(cap.isOpened())
+	{
+		cout<<"OKKKKKKKKKKKK";
 		extractFromStream(cap);
 		waitKey(0);
+	}
 }
 
 
